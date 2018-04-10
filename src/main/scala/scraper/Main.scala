@@ -2,6 +2,7 @@ package scraper
 
 import java.io.{FileWriter, IOException}
 
+import com.typesafe.config.ConfigFactory
 import play.api.libs.json.Json
 
 
@@ -25,7 +26,9 @@ object Main {
   }
 
   def writeToFile(jsValue: String): Unit = {
-    val file = new FileWriter("file.txt")
+    val defaultConfig = ConfigFactory.parseResources("defaults.conf")
+    val nameFile = defaultConfig.getString("conf.nameFile")
+    val file = new FileWriter(nameFile)
     file.write(jsValue)
     file.close()
   }
