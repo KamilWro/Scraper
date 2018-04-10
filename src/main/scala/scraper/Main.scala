@@ -16,8 +16,9 @@ object Main {
         val scraper = Scraper()
         val webPosts = scraper.extractPosts(n)
         val jsValue = Json.toJson(webPosts)
+        
+        printToConsole(scraper)
         writeToFile(jsValue.toString())
-
       } catch {
         case e: NumberFormatException => e.printStackTrace()
         case e: IOException => e.printStackTrace()
@@ -31,5 +32,12 @@ object Main {
     val file = new FileWriter(nameFile)
     file.write(jsValue)
     file.close()
+  }
+
+  def printToConsole(scraper: Scraper): Unit = {
+    println("Total number of pages downloaded:" + scraper.totalPageNumber())
+    println("Total number of posts downloaded:" + scraper.totalPostNumber())
+    println("Average pages download time:" + scraper.avgPageDownloadTime() + "ms")
+    println("Average posts download time:" + scraper.avgPostDownloadTime() + "ms")
   }
 }
