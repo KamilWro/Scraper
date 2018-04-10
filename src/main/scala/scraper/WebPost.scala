@@ -6,4 +6,4 @@ object WebPost {
   implicit val webPostFormat = Json.writes[WebPost]
 }
 
-case class WebPost(id: String, points: String, content: String)
+case class WebPost(id: Long, points: Long, content: String)

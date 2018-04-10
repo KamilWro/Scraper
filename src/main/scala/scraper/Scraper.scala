@@ -28,14 +28,14 @@ class Scraper {
   }
 
   private def extract(element: Element): WebPost = {
-    val id = idText(element)
-    val point = pointText(element)
+    val id = idText(element).substring(1).toLong
+    val point = pointText(element).toLong
     val content = contentText(element)
 
     WebPost(id, point, content)
   }
 
-  private def idText(element: Element): String = element.select(".qid.click").text
+  private def idText(element: Element): String = element.select(".qid.click").text()
 
   private def contentText(element: Element): String = element.select(".quote.post-content.post-body").text
 
