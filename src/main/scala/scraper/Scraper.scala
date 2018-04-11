@@ -1,8 +1,9 @@
 package scraper
 
+import java.io.IOException
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
-import org.jsoup.select.Elements
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
@@ -13,18 +14,23 @@ class Scraper {
   private var sumPagesDownloadTime: Long = 0
   private var sumPostsDownloadTime: Long = 0
 
-  def extractPosts(n: Long): Seq[WebPost] = {
+  def extractPosts(maxPosts: Long): Seq[WebPost] = {
     clear()
-    var webPosts = ListBuffer[WebPost]()
+    val webPosts = ListBuffer[WebPost]()
 
-    while (postsNumber < n) {
+    try {
       pageNumber += 1
-      val document = getDocument(pageNumber)
-      var posts = getPosts(document).asScala.toList
-      for (post <- posts if postsNumber < n) {
-        webPosts += extract(post)
-        postsNumber += 1
+      while (postsNumber < maxPosts) {
+        val document = getDocument(pageNumber)
+        var posts = getPosts(document)
+        for (post <- posts if postsNumber < maxPosts) {
+          webPosts += extract(post)
+          postsNumber += 1
+        }
       }
+    }
+    catch {
+      case e: IOException => System.err.println("Page number " + pageNumber + " is not available");
     }
 
     webPosts
@@ -51,12 +57,12 @@ class Scraper {
 
   private def getPointText(post: Element): String = post.select(".points").text
 
-  private def getPosts(document: Document): Elements = {
+  private def getPosts(document: Document): List[Element] = {
     val millisActualTime = System.currentTimeMillis
     val posts = document.select(".q.post")
     sumPostsDownloadTime += System.currentTimeMillis - millisActualTime
 
-    posts
+    posts.asScala.toList
   }
 
   private def getDocument(pageNumber: Long): Document = {
