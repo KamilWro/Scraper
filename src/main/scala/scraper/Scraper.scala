@@ -14,19 +14,19 @@ class Scraper {
   private var sumPagesDownloadTime: Long = 0
   private var sumPostsDownloadTime: Long = 0
 
-  def extractPosts(maxPosts: Long): Seq[WebPost] = {
+  def extractPosts(maxPages: Long): Seq[WebPost] = {
     clear()
     val webPosts = ListBuffer[WebPost]()
 
     try {
-      pageNumber += 1
-      while (postsNumber < maxPosts) {
+      while (pageNumber <= maxPages) {
+        pageNumber += 1
         val document = getDocument(pageNumber)
-        var posts = getPosts(document)
-        for (post <- posts if postsNumber < maxPosts) {
+        val posts = getPosts(document)
+        posts.foreach(post => {
           webPosts += extract(post)
           postsNumber += 1
-        }
+        })
       }
     }
     catch {
@@ -79,7 +79,7 @@ class Scraper {
 
   def totalPostNumber: Long = postsNumber
 
-  def totalPageNumber: Long = pageNumber
+  def totalPageNumber: Long = pageNumber - 1
 
 }
 

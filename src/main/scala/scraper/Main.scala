@@ -12,9 +12,9 @@ object Main {
       System.err.println("Expected one argument")
     else
       try {
-        val maxPosts = args(0).toLong
+        val maxPages = args(0).toLong
         val scraper = Scraper()
-        val webPosts = scraper.extractPosts(maxPosts)
+        val webPosts = scraper.extractPosts(maxPages)
         val jsValue = Json.toJson(webPosts)
 
         printToConsole(scraper)
