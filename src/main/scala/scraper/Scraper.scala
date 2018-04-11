@@ -4,6 +4,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import org.jsoup.select.Elements
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
 class Scraper {
@@ -12,21 +13,20 @@ class Scraper {
   private var sumPagesDownloadTime: Long = 0
   private var sumPostsDownloadTime: Long = 0
 
-  def extractPosts(n: Int): Seq[WebPost] = {
+  def extractPosts(n: Long): Seq[WebPost] = {
     clear()
     var webPosts = ListBuffer[WebPost]()
 
     while (postsNumber < n) {
       pageNumber += 1
       val document = getDocument(pageNumber)
-      var posts = getPosts(document)
-
-      var it = posts.listIterator()
-      while (it.hasNext && postsNumber < n) {
-        webPosts += extract(it.next)
+      var posts = getPosts(document).asScala.toList
+      for (post <- posts if postsNumber < n) {
+        webPosts += extract(post)
         postsNumber += 1
       }
     }
+
     webPosts
   }
 
@@ -38,18 +38,18 @@ class Scraper {
   }
 
   private def extract(post: Element): WebPost = {
-    val id = idText(post).substring(1).toLong
-    val point = pointText(post).toLong
-    val content = contentText(post)
+    val id = getIdText(post).substring(1).toLong
+    val point = getPointText(post).toLong
+    val content = getContentText(post)
 
     WebPost(id, point, content)
   }
 
-  private def idText(post: Element): String = post.select(".qid.click").text()
+  private def getIdText(post: Element): String = post.select(".qid.click").text()
 
-  private def contentText(post: Element): String = post.select(".quote.post-content.post-body").text
+  private def getContentText(post: Element): String = post.select(".quote.post-content.post-body").text
 
-  private def pointText(post: Element): String = post.select(".points").text
+  private def getPointText(post: Element): String = post.select(".points").text
 
   private def getPosts(document: Document): Elements = {
     val millisActualTime = System.currentTimeMillis
@@ -67,13 +67,13 @@ class Scraper {
     document
   }
 
-  def avgPageDownloadTime(): Double = if (pageNumber == 0) 0d else sumPagesDownloadTime / pageNumber
+  def avgPageDownloadTime: Double = if (pageNumber == 0) 0d else sumPagesDownloadTime / pageNumber
 
-  def avgPostDownloadTime(): Double = if (postsNumber == 0) 0d else sumPostsDownloadTime / postsNumber
+  def avgPostDownloadTime: Double = if (postsNumber == 0) 0d else sumPostsDownloadTime / postsNumber
 
-  def totalPostNumber(): Long = postsNumber
+  def totalPostNumber: Long = postsNumber
 
-  def totalPageNumber(): Long = pageNumber
+  def totalPageNumber: Long = pageNumber
 
 }
 
