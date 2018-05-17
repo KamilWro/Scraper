@@ -1,13 +1,9 @@
-package scraper
-
 import java.io.FileWriter
 
 import com.typesafe.config.ConfigFactory
 import play.api.libs.json.Json
 
-
-object Main {
-  def main(args: Array[String]): Unit = {
+object Main extends App {
     if (args.length != 1)
       System.err.println("Expected one argument")
     else
@@ -22,7 +18,6 @@ object Main {
       } catch {
         case e: Exception => e.printStackTrace()
       }
-  }
 
   def writeToFile(jsValue: String): Unit = {
     val defaultConfig = ConfigFactory.parseResources("defaults.conf")

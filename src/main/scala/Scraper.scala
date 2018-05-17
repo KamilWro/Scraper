@@ -1,5 +1,3 @@
-package scraper
-
 import java.io.IOException
 
 import org.jsoup.Jsoup
