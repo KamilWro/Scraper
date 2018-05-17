@@ -28,9 +28,9 @@ object Main extends App {
   }
 
   def printToConsole(scraper: Scraper): Unit = {
-    println("Total number of pages downloaded:" + scraper.totalPageNumber)
-    println("Total number of posts downloaded:" + scraper.totalPostNumber)
-    println("Average pages download time:" + scraper.avgPageDownloadTime + "ms")
-    println("Average posts download time:" + scraper.avgPostDownloadTime + "ms")
+    println(s"Total number of pages downloaded: ${scraper.totalPageNumber}")
+    println(s"Total number of posts downloaded: ${scraper.totalPostNumber}")
+    println(s"Average pages download time: ${scraper.avgPageDownloadTime} ms")
+    println(s"Average posts download time: ${scraper.avgPostDownloadTime} ms")
   }
 }
