@@ -1,3 +1,5 @@
+package scraper.model
+
 import play.api.libs.json.{Json, OWrites}
 
 object WebPost {
