@@ -7,7 +7,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-
 class ContentExtractors extends LazyLogging {
 
   private implicit class FutureOps[T](val self: Future[T]) {
@@ -18,10 +17,10 @@ class ContentExtractors extends LazyLogging {
   }
 
   def processPages(pagesCount: Long): Future[List[Seq[WebPost]]] = {
-    val webPosts = List.range(0, pagesCount + 1).map(pageNumber => processPage(pageNumber))
-    val triedWebPosts = Future.sequence(webPosts.map(futureToFutureTry))
-    logStatistics(triedWebPosts)
-    filterFutureSequence(triedWebPosts)
+    val processedPages = List.range(1, pagesCount + 1).map(pageNumber => processPage(pageNumber))
+    val triedProcessedPages = Future.sequence(processedPages.map(futureToFutureTry))
+    Statistics().log(triedProcessedPages)
+    mapToWebPosts(triedProcessedPages)
   }
 
   private def processPage(pageNumber: Long): Future[(Seq[WebPost], Long)] = {
@@ -35,31 +34,12 @@ class ContentExtractors extends LazyLogging {
   private def futureToFutureTry[T](future: Future[T]): Future[Try[T]] =
     future.map(Success(_)).recover { case x => Failure(x) }
 
-  private def logStatistics(triedWebPosts: Future[List[Try[(Seq[WebPost], Long)]]]) = {
-    triedWebPosts.map(_.filter(_.isFailure).map { case Failure(e) => logger.error(e.getMessage) })
-    val responseTimes = logStatisticsAboutPages(triedWebPosts)
-    logStatisticsAboutPosts(triedWebPosts, responseTimes)
-  }
+  def mapToWebPosts(triedProcessedPages: Future[List[Try[(Seq[WebPost], Long)]]]): Future[List[Seq[WebPost]]] =
+    triedProcessedPages.map(_.filter(_.isSuccess).map { case Success(value) => value._1 })
 
-  private def logStatisticsAboutPages(triedWebPosts: Future[List[Try[(Seq[WebPost], Long)]]]) = {
-    val responseTimes = triedWebPosts.map(_.filter(_.isSuccess).map { case Success(value) => value._2 })
-    responseTimes.map(times => {
-      logger.info(s"Total number of pages downloaded: ${times.length}")
-      logger.info(s"Average pages download time: ${times.sum / times.length}ms")
-    })
-    responseTimes
-  }
+  def mapToResponseTimes(triedWebPosts: Future[List[Try[(Seq[WebPost], Long)]]]): Future[List[Long]] =
+    triedWebPosts.map(_.filter(_.isSuccess).map { case Success(value) => value._2 })
 
-  private def logStatisticsAboutPosts(triedWebPosts: Future[List[Try[(Seq[WebPost], Long)]]], responseTimes: Future[List[Long]]) = {
-    val webPosts = filterFutureSequence(triedWebPosts)
-    webPosts.zip(responseTimes).map { case (posts, times) =>
-      logger.info(s"Total number of posts downloaded: ${posts.flatten.length}")
-      logger.info(s"Average posts download time: ${times.sum / posts.flatten.length}ms")
-    }
-  }
-
-  private def filterFutureSequence(triedWebPosts: Future[List[Try[(Seq[WebPost], Long)]]]): Future[List[Seq[WebPost]]] =
-    triedWebPosts.map(_.filter(_.isSuccess).map { case Success(value) => value._1 })
 }
 
 object ContentExtractors {

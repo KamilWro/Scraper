@@ -10,27 +10,27 @@ class HtmlExtractor {
 
   def extractPosts(pageNumber: Long): Seq[WebPost] = {
     val document = getDocument(pageNumber)
-    val posts = getPosts(document)
+    val posts = selectPosts(document)
     posts.map(post => extractPost(post))
   }
 
   private def extractPost(post: Element): WebPost = {
-    val id = getIdText(post).substring(1).toLong
-    val point = getPointText(post).toLong
-    val content = getContentText(post)
+    val id = selectIdText(post).drop(1).toLong
+    val point = selectPointText(post).toLong
+    val content = selectContentText(post)
 
     WebPost(id, point, content)
   }
 
-  private def getIdText(post: Element): String = post.select(".qid.click").text()
+  private def selectIdText(post: Element): String = post.select(".qid.click").text
 
-  private def getContentText(post: Element): String = post.select(".quote.post-content.post-body").text
+  private def selectContentText(post: Element): String = post.select(".quote.post-content.post-body").text
 
-  private def getPointText(post: Element): String = post.select(".points").text
+  private def selectPointText(post: Element): String = post.select(".points").text
 
-  private def getPosts(document: Document): List[Element] = document.select(".q.post").asScala.toList
+  private def selectPosts(document: Document): List[Element] = document.select(".q.post").asScala.toList
 
-  private def getDocument(pageNumber: Long): Document = Jsoup.connect("http://bash.org.pl/latest/?page=" + pageNumber).get
+  private def getDocument(pageNumber: Long): Document = Jsoup.connect(s"http://bash.org.pl/latest/?page=$pageNumber").get
 }
 
 object HtmlExtractor {
