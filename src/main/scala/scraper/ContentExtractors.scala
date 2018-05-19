@@ -36,12 +36,21 @@ class ContentExtractors extends LazyLogging {
     future.map(Success(_)).recover { case x => Failure(x) }
 
   private def logStatistics(triedWebPosts: Future[List[Try[(Seq[WebPost], Long)]]]) = {
+    triedWebPosts.map(_.filter(_.isFailure).map { case Failure(e) => logger.error(e.getMessage) })
+    val responseTimes = logStatisticsAboutPages(triedWebPosts)
+    logStatisticsAboutPosts(triedWebPosts, responseTimes)
+  }
+
+  private def logStatisticsAboutPages(triedWebPosts: Future[List[Try[(Seq[WebPost], Long)]]]) = {
     val responseTimes = triedWebPosts.map(_.filter(_.isSuccess).map { case Success(value) => value._2 })
     responseTimes.map(times => {
       logger.info(s"Total number of pages downloaded: ${times.length}")
       logger.info(s"Average pages download time: ${times.sum / times.length}ms")
     })
+    responseTimes
+  }
 
+  private def logStatisticsAboutPosts(triedWebPosts: Future[List[Try[(Seq[WebPost], Long)]]], responseTimes: Future[List[Long]]) = {
     val webPosts = filterFutureSequence(triedWebPosts)
     webPosts.zip(responseTimes).map { case (posts, times) =>
       logger.info(s"Total number of posts downloaded: ${posts.flatten.length}")
