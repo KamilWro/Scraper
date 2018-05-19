@@ -24,7 +24,7 @@ object Main extends LazyLogging {
 
   private def processWeb(pagesCount: Long) = {
     val webPosts = ContentExtractors().processPages(pagesCount)
-    val writer = webPosts.map(value => writeToFile(Json.toJson(value.flatten).toString()))
+    val writer = webPosts.map(value => writeToFile(Json.toJson(value.flatten).toString))
     Await.ready(writer, Duration.Inf)
   }
 
