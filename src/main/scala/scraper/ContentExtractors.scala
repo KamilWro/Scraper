@@ -42,7 +42,4 @@ class ContentExtractors extends LazyLogging {
 
 object ContentExtractors {
   def apply() = new ContentExtractors()
-
-  case class ProccessPages(pagesCount: Long)
-
 }
