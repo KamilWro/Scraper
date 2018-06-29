@@ -17,13 +17,13 @@ class Statistics extends LazyLogging {
     logAboutPosts(triedProcessedPages)
   }
 
-  private def logAboutPages(triedProcessedPages: Future[List[Try[(Seq[WebPost], Long)]]]): Unit =
+  private def logAboutPages(triedProcessedPages: Future[List[Try[(Seq[WebPost], Long)]]]) =
     contentExtractors.mapToResponseTimes(triedProcessedPages).foreach(times => {
       logger.info(s"Total number of pages downloaded: ${times.length}")
       if (times.nonEmpty) logger.info(s"Average pages download time: ${times.sum / times.length}ms")
     })
 
-  private def logAboutPosts(triedProcessedPages: Future[List[Try[(Seq[WebPost], Long)]]]): Unit = {
+  private def logAboutPosts(triedProcessedPages: Future[List[Try[(Seq[WebPost], Long)]]]) = {
     val responseTimes = contentExtractors.mapToResponseTimes(triedProcessedPages)
     contentExtractors.mapToWebPosts(triedProcessedPages).zip(responseTimes).foreach { case (posts, times) =>
       logger.info(s"Total number of posts downloaded: ${posts.flatten.length}")

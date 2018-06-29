@@ -23,13 +23,13 @@ class ContentExtractors extends LazyLogging {
     mapToWebPosts(triedProcessedPages)
   }
 
-  private def processPage(pageNumber: Long): Future[(Seq[WebPost], Long)] = {
+  private def processPage(pageNumber: Long) = {
     val webPosts = Future {HtmlExtractor().extractPosts(pageNumber)}
     val responseTime = webPosts.measureResponseTime()
     webPosts.zip(responseTime)
   }
 
-  private def futureToFutureTry[T](future: Future[T]): Future[Try[T]] =
+  private def futureToFutureTry[T](future: Future[T]) =
     future.map(Success(_)).recover { case x => Failure(x) }
 
   def mapToWebPosts(triedProcessedPages: Future[List[Try[(Seq[WebPost], Long)]]]): Future[List[Seq[WebPost]]] =
@@ -42,4 +42,7 @@ class ContentExtractors extends LazyLogging {
 
 object ContentExtractors {
   def apply() = new ContentExtractors()
+
+  case class ProccessPages(pagesCount: Long)
+
 }
