@@ -1,21 +1,25 @@
 # Scraper
-Scraper do strony [bash.org.pl](http://bash.org.pl), który ściąga `n` najnowszych stron i parsuje do jsona w formie:</br>
+
+#### Opis:
+Scraper do strony [bash.org.pl](http://bash.org.pl), który ściąga `n` najnowszych stron i parsuje do jsona w formie:  
 {
    "id": x,
    "points": y,
    "content": z
-}, gdzie `x` to id wpisu jako Long, `y` punkty jako Long i `z` treść jako String.
-</br></br>
+}, gdzie `x` - id wpisu (typu `Long`), `y` - zdobyte punkty (typu `Long `), `z` - treść wpisu (typu `String`).
+  
+  
 Po zakończeniu crawlowania na konsoli wyświetlane są podstawowe statystyki (liczba pozyskanych wpisów, średni czas pozyskiwania jednego wpisu, średni czas pozyskiwania jednej strony).
 
-### Technologie
-- Jsoup
+#### Technologie
+- JSoup
 - Typesafe config
 - Play Json
 - Scala-logging
 - ScalaTest
 - Future
+- Akka
 
-### Kompilacja i uruchmienie:
-`$ sbt` </br>
+#### Kompilacja i uruchmienie:
+`$ sbt`  
 `sbt:Scraper> run n`
