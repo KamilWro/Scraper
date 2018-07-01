@@ -1,13 +1,12 @@
 package scraper
 
+import akka.actor.{Actor, Props}
 import com.typesafe.scalalogging.LazyLogging
-import scraper.model.WebPost
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
 
-class ContentExtractors extends LazyLogging {
+class ContentExtractors extends Actor with LazyLogging {
 
   private implicit class FutureOps[T](val self: Future[T]) {
     def measureResponseTime(): Future[Long] = {
@@ -16,11 +15,15 @@ class ContentExtractors extends LazyLogging {
     }
   }
 
-  def processPages(pagesCount: Long): Future[List[Seq[WebPost]]] = {
+  override def receive: Receive = {
+    case ContentExtractors.ProcessPages(pagesCount) => sender ! processPages(pagesCount)
+  }
+
+  private def processPages(pagesCount: Long) = {
     val processedPages = List.range(1, pagesCount + 1).map(pageNumber => processPage(pageNumber))
-    val triedProcessedPages = Future.sequence(processedPages.map(futureToFutureTry))
+    val triedProcessedPages = Future.sequence(processedPages.map(Mapper.mapToFutureTry))
     Statistics().log(triedProcessedPages)
-    mapToWebPosts(triedProcessedPages)
+    Mapper.mapToWebPosts(triedProcessedPages)
   }
 
   private def processPage(pageNumber: Long) = {
@@ -28,18 +31,11 @@ class ContentExtractors extends LazyLogging {
     val responseTime = webPosts.measureResponseTime()
     webPosts.zip(responseTime)
   }
-
-  private def futureToFutureTry[T](future: Future[T]) =
-    future.map(Success(_)).recover { case x => Failure(x) }
-
-  def mapToWebPosts(triedProcessedPages: Future[List[Try[(Seq[WebPost], Long)]]]): Future[List[Seq[WebPost]]] =
-    triedProcessedPages.map(_.filter(_.isSuccess).map { case Success(value) => value._1 })
-
-  def mapToResponseTimes(triedProcessedPages: Future[List[Try[(Seq[WebPost], Long)]]]): Future[List[Long]] =
-    triedProcessedPages.map(_.filter(_.isSuccess).map { case Success(value) => value._2 })
-
 }
 
 object ContentExtractors {
-  def apply() = new ContentExtractors()
+  def props: Props = Props[ContentExtractors]
+
+  case class ProcessPages(pagesCount: Long)
+
 }

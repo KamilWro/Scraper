@@ -4,10 +4,7 @@ import org.jsoup.nodes.Element
 import org.jsoup.parser.Tag
 import org.scalatest.{FunSuite, PrivateMethodTester}
 import scraper.model.WebPost
-import scraper.{ContentExtractors, HtmlExtractor}
-
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
+import scraper.HtmlExtractor
 
 class HtmlExtractorTest extends FunSuite with PrivateMethodTester {
 
@@ -18,10 +15,8 @@ class HtmlExtractorTest extends FunSuite with PrivateMethodTester {
   }
 
   test("extract posts with positive page number should return non empty list") {
-    val webPost = ContentExtractors().processPages(1)
-    Await.ready(webPost, Duration.Inf)
-    val result = webPost.value.get
-    assert(result.get.nonEmpty)
+    val result = HtmlExtractor().extractPosts(1)
+    assert(result.nonEmpty)
   }
 
   test("extract post with element containing post should return exactly one WebPost") {
